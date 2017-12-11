@@ -1,0 +1,12 @@
+extensions=".c.cpp.h.hpp.glsl.config";
+
+fkey_command_win[1] = {"..\\build\\win32_main.exe", "*run*"};
+fkey_command_win[2] = {0, 0};
+fkey_command_win[3] = {"start ,",  "*run*"};
+fkey_command_win[4] = {"start .", "*run*"};
+fkey_command_win[5] = {"..\\build\\win32_main.exe", "*run*"};
+fkey_command_win[6] = {0, 0};
+fkey_command_win[7] = {0, 0};
+fkey_command_win[8] = {0, 0};
+fkey_command_win[9] = {0, 0};
+fkey_command_win[10] = {0, 0};
