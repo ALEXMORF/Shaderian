@@ -3,7 +3,8 @@ TODO(chen):
 
 . Change shaderian's interface function to mainImage() style, like shadertoy
 . Recompile fragment shader only
-. Make topmost style an option
+. Make topmost style only an option
+. Output error as text, not intrusive messagebox
 . Need a test case for shader program linkage error
  . Add mouse input
  
