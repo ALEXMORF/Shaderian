@@ -63,6 +63,9 @@ Win32WindowCallback(HWND Window, UINT Message, WPARAM Wparam, LPARAM Lparam)
 
 int main(int ArgumentCount, char **ArgumentList) 
 {
+    f32 TargetFPS = 60.0f;
+    f32 TargetElapsedTimeInMS = 1000.0f / 60.0f;
+    
     if (ArgumentCount != 2)
     {
         printf("Usage: shaderian [fragment shader file]\n");
@@ -123,14 +126,22 @@ int main(int ArgumentCount, char **ArgumentList)
                     
                     if (KeyWasDown != KeyIsDown)
                     {
-                        if (Message.wParam == VK_ESCAPE)
+                        if (KeyIsDown)
                         {
-                            gAppIsRunning = false;
-                        }
-                        
-                        if (KeyIsDown && AltIsDown && Message.wParam == VK_RETURN)
-                        {
-                            Win32ToggleFullscreen(Window);
+                            if (Message.wParam == VK_ESCAPE)
+                            {
+                                gAppIsRunning = false;
+                            }
+                            
+                            if (AltIsDown && Message.wParam == VK_F4)
+                            {
+                                gAppIsRunning = false;
+                            }
+                            
+                            if (AltIsDown && Message.wParam == VK_RETURN)
+                            {
+                                Win32ToggleFullscreen(Window);
+                            }
                         }
                     }
                 } break;
@@ -146,10 +157,21 @@ int main(int ArgumentCount, char **ArgumentList)
         
         AppUpdateAndRender(&AppState, LastFrameTimeInS, gWindowWidth, gWindowHeight);
         SwapBuffers(GetDC(Window));
-        Sleep(5);
+        
+        u64 ElapsedCounter = Win32GetPerformanceCounter();
+        f32 ElapsedTimeInMS = Win32GetTimeElapsedInMS(BeginCounter, ElapsedCounter);
+        if (ElapsedTimeInMS < TargetElapsedTimeInMS)
+        {
+            Sleep((LONG)(TargetElapsedTimeInMS - ElapsedTimeInMS));
+            while (Win32GetTimeElapsedInMS(BeginCounter, Win32GetPerformanceCounter()) < TargetElapsedTimeInMS);
+        }
         
         u64 EndCounter = Win32GetPerformanceCounter();
         LastFrameTimeInS = Win32GetTimeElapsedInMS(BeginCounter, EndCounter) / 1000.0f;
+        
+        char Buffer[50];
+        snprintf(Buffer, sizeof(Buffer), "Shaderian, elapsed time: %.2fms", LastFrameTimeInS*1000.0f);
+        SetWindowText(Window, Buffer);
     }
     
     return 0;

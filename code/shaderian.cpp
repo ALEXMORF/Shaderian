@@ -1,11 +1,9 @@
 /*
 TODO(chen):
 
-. Change shaderian's interface function to mainImage() style, like shadertoy
 . Recompile fragment shader only
+. Change shaderian's interface function to mainImage() style, like shadertoy
 . Make topmost style only an option
-. Lock app loop at 60 FPS
-. Exit by pressing alt-f4
 . Output error as text, not intrusive messagebox
 . Need a test case for shader program linkage error
  . Add mouse input
