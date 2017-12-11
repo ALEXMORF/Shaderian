@@ -37,6 +37,12 @@ Win32WindowCallback(HWND Window, UINT Message, WPARAM Wparam, LPARAM Lparam)
             gAppIsRunning = false;
         } break;
         
+        case WM_ACTIVATE:
+        {
+            WORD IsActive = LOWORD(Wparam) == WA_ACTIVE;
+            SetLayeredWindowAttributes(Window, 0, IsActive? 255: 100, LWA_ALPHA);
+        } break;
+        
         case WM_SIZE:
         {
             gWindowWidth = LOWORD(Lparam);
@@ -74,6 +80,10 @@ int main(int ArgumentCount, char **ArgumentList)
         ErrorMessageBox("Couldn't create a window");
         return -1;
     }
+    //extra styling on our window to make it transparent 
+    SetWindowLong(Window, GWL_EXSTYLE, WS_EX_LAYERED);
+    
+    //opengl stuff
     int OpenglMajorVersion = 3;
     int OpenglMinorVersion = 3;
     if (!Win32InitializeOpengl(GetDC(Window), OpenglMajorVersion, OpenglMinorVersion))
@@ -85,6 +95,8 @@ int main(int ArgumentCount, char **ArgumentList)
         return -1;
     }
     LoadGLFunctions(Win32GetOpenglFunction);
+    
+    
     
     //application loop
     app_state AppState = {};

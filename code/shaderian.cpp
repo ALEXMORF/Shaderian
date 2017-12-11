@@ -1,10 +1,12 @@
 /*
 TODO(chen):
 
+. Change shaderian's interface function to mainImage() style, like shadertoy
+. Recompile fragment shader only
+. Make topmost style an option
 . Need a test case for shader program linkage error
- . Allow shaderian to be a transparent topmost window, so no switching tabs
-. Add mouse input
-
+ . Add mouse input
+ 
 */
 
 #include "shaderian.h"
