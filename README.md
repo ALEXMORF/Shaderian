@@ -27,3 +27,12 @@ For example:
 ```
 out vec4 FragColor;
 ```
+
+# Integration with your editor
+
+When shaderian is deactivated, it will stay as a layered window, and you can still edit the file while seeing changes. 
+
+
+Shaderian combined with your favorite editor:
+
+<img width="820" alt="shaderian_demo" src="https://user-images.githubusercontent.com/16845654/33856681-bb18d78c-de7d-11e7-97af-792efa8b5d73.PNG">
