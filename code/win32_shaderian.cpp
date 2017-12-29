@@ -73,6 +73,11 @@ int main(int ArgumentCount, char **ArgumentList)
     }
     char *ShaderFilename = ArgumentList[1];
     
+    char CurrentDirectory[255] = {};
+    GetCurrentDirectory(sizeof(CurrentDirectory), CurrentDirectory);
+    char FullShaderPath[255] = {};
+    snprintf(FullShaderPath, sizeof(FullShaderPath), "%s\\%s", CurrentDirectory, ShaderFilename);
+    
     //initialize platform stuff
     HINSTANCE InstanceHandle = GetModuleHandle(0);
     HWND Window = Win32CreateWindow(InstanceHandle, 1200, 800, 
@@ -99,11 +104,9 @@ int main(int ArgumentCount, char **ArgumentList)
     }
     LoadGLFunctions(Win32GetOpenglFunction);
     
-    
-    
     //application loop
     app_state AppState = {};
-    AppState.ShaderFilename = ShaderFilename;
+    AppState.ShaderFilename = FullShaderPath;
     gAppIsRunning = true;
     f32 LastFrameTimeInS = 0.0f;
     while (gAppIsRunning)

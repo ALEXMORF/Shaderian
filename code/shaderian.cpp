@@ -1,13 +1,9 @@
 /*
 TODO(chen):
 
-. Recompile fragment shader only
+. Dynamically capture the working directory, no matter where the executable is
 . Change shaderian's interface function to mainImage() style, like shadertoy
-. Make topmost style only an option
-. Output error as text, not intrusive messagebox
-. Need a test case for shader program linkage error
- . Add mouse input
- 
+
 */
 
 #include "shaderian.h"
@@ -81,7 +77,7 @@ CompileShaderProgram(char *FragShaderSrc, string ErrorMessage = {},
     
     void main()
     {
-    FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    FragColor = vec4(0.0, 0.0, 0.0, 1.0);
     }
     
     )";
@@ -167,14 +163,14 @@ AppUpdateAndRender(app_state *App, f32 dT, int WindowWidth, int WindowHeight)
         App->ShaderLastWriteTime = GetFileLastWriteTime(App->ShaderFilename);
         if (!ShaderSource) 
         {
-            printf("can't find shader file\n");
+            printf("can't find shader file or it is empty :(\n");
         }
         
         char Buffer[1024] = {};
         string ErrorString = STACK_STRING(Buffer);
         
         App->Program = CompileShaderProgram(ShaderSource, ErrorString);
-        if (ErrorString.E[0]) ErrorMessageBox(ErrorString.E);
+        //if (ErrorString.E[0]) ErrorMessageBox(ErrorString.E);
         
         App->LastShaderSource = ShaderSource;
         
@@ -201,7 +197,7 @@ AppUpdateAndRender(app_state *App, f32 dT, int WindowWidth, int WindowHeight)
         }
         else
         {
-            ErrorMessageBox(ErrorString.E);
+            //ErrorMessageBox(ErrorString.E);
             Win32FreeFileMemory(NewShaderSource);
         }
     }
