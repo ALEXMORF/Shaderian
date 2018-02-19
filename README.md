@@ -6,6 +6,22 @@ A live GLSL programming environment on windows. Edit your shader code and see th
 
 shaderian.exe [shader filename]
 
+This is the starter code, just copy paste this into your shader and start from there. 
+
+```
+#version 330 core
+
+uniform float uTime;      //time the app has been running in seconds
+uniform vec2 uResolution; //window client rect resolution in pixels
+in vec2 FragCoord;        //normalized fragment coordinate, range: <[-1, 1], [-1, 1]>
+out vec4 FragColor;
+
+void main()
+{
+//your code
+}
+```
+
 # Current uniforms 
 
 ```
