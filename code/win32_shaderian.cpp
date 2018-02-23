@@ -77,7 +77,6 @@ bool StringEqual(char *A, char *B)
 
 int main(int ArgumentCount, char **ArgumentList) 
 {
-    f32 TargetElapsedTimeInMS = 1000.0f / 60.0f;
     bool ShazanMode = false;
     
     if (ArgumentCount != 2 && ArgumentCount != 3)
@@ -121,8 +120,8 @@ int main(int ArgumentCount, char **ArgumentList)
 
     HDC WindowDC = GetWindowDC(0); 
     i32 FrameRate = GetDeviceCaps(WindowDC, VREFRESH);
-    f32 TargetFPS = (f32)FrameRate;
     ReleaseDC(0, WindowDC);
+    f32 TargetElapsedTimeInMS = 1000.0f / (f32)FrameRate;
     
     //opengl stuff
     int OpenglMajorVersion = 3;
