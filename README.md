@@ -36,3 +36,7 @@ When shaderian is deactivated, it will stay as a layered window, and you can sti
 Shaderian combined with your favorite editor:
 
 <img width="820" alt="shaderian_demo" src="https://user-images.githubusercontent.com/16845654/33856681-bb18d78c-de7d-11e7-97af-792efa8b5d73.PNG">
+
+# Tutorials
+
+[getting started](https://www.youtube.com/watch?v=6BZuYtx3Uyw)
