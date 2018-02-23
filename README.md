@@ -4,12 +4,18 @@ A live GLSL programming environment on windows. Edit your shader code and see th
 
 # Usage
 
-shaderian.exe [shader filename]
+shaderian.exe [shader filename] [option]
+
+# Options
+
+shazan - create an opengl 3.0 context instead of 3.3 core profile context
+
+# Starter code
 
 This is the starter code, just copy paste this into your shader and start from there. 
 
 ```
-#version 330 core
+#version 330 core //or your respective version of glsl
 
 uniform float uTime;      // time the app has been running in seconds
 uniform vec2 uResolution; // window client rect resolution in pixels
