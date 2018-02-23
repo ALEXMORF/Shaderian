@@ -77,7 +77,6 @@ bool StringEqual(char *A, char *B)
 
 int main(int ArgumentCount, char **ArgumentList) 
 {
-    f32 TargetFPS = 60.0f;
     f32 TargetElapsedTimeInMS = 1000.0f / 60.0f;
     bool ShazanMode = false;
     
@@ -87,17 +86,21 @@ int main(int ArgumentCount, char **ArgumentList)
         return -1;
     }
     char *ShaderFilename = ArgumentList[1];
-    char *Option = ArgumentList[2];
-    if (StringEqual(Option, "shazan"))
+
+    if (ArgumentCount == 3)
     {
-        ShazanMode = true;
+        char *Option = ArgumentList[2];
+        if (StringEqual(Option, "shazan"))
+        {
+            ShazanMode = true;
+        }
+        else
+        {
+            printf("%s is not a valid option\n", Option);
+            return -1;
+        }
     }
-    else
-    {
-        printf("%s is not a valid option\n", Option);
-        return -1;
-    }
-    
+
     char CurrentDirectory[255] = {};
     GetCurrentDirectory(sizeof(CurrentDirectory), CurrentDirectory);
     char FullShaderPath[255] = {};
@@ -115,6 +118,11 @@ int main(int ArgumentCount, char **ArgumentList)
     }
     //extra styling on our window to make it transparent 
     SetWindowLong(Window, GWL_EXSTYLE, WS_EX_LAYERED);
+
+    HDC WindowDC = GetWindowDC(0); 
+    i32 FrameRate = GetDeviceCaps(WindowDC, VREFRESH);
+    f32 TargetFPS = (f32)FrameRate;
+    ReleaseDC(0, WindowDC);
     
     //opengl stuff
     int OpenglMajorVersion = 3;
