@@ -61,17 +61,42 @@ Win32WindowCallback(HWND Window, UINT Message, WPARAM Wparam, LPARAM Lparam)
     return Result;
 }
 
+bool StringEqual(char *A, char *B)
+{
+    while (*A && *B)
+    {
+        if (*A == *B)
+        {
+            ++A;
+            ++B;
+        }
+    }
+
+    return *A == *B;
+}
+
 int main(int ArgumentCount, char **ArgumentList) 
 {
     f32 TargetFPS = 60.0f;
     f32 TargetElapsedTimeInMS = 1000.0f / 60.0f;
+    bool ShazanMode = false;
     
-    if (ArgumentCount != 2)
+    if (ArgumentCount != 2 && ArgumentCount != 3)
     {
-        printf("Usage: shaderian [fragment shader file]\n");
+        printf("Usage: shaderian [fragment shader file] [options]\n");
         return -1;
     }
     char *ShaderFilename = ArgumentList[1];
+    char *Option = ArgumentList[2];
+    if (StringEqual(Option, "shazan"))
+    {
+        ShazanMode = true;
+    }
+    else
+    {
+        printf("%s is not a valid option\n", Option);
+        return -1;
+    }
     
     char CurrentDirectory[255] = {};
     GetCurrentDirectory(sizeof(CurrentDirectory), CurrentDirectory);
@@ -94,6 +119,12 @@ int main(int ArgumentCount, char **ArgumentList)
     //opengl stuff
     int OpenglMajorVersion = 3;
     int OpenglMinorVersion = 3;
+    if (ShazanMode)
+    {
+        OpenglMajorVersion = 3;
+        OpenglMinorVersion = 0;
+    }
+
     if (!Win32InitializeOpengl(GetDC(Window), OpenglMajorVersion, OpenglMinorVersion))
     {
         char ErrorMessage[250];

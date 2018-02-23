@@ -170,7 +170,6 @@ AppUpdateAndRender(app_state *App, f32 dT, int WindowWidth, int WindowHeight)
         string ErrorString = STACK_STRING(Buffer);
         
         App->Program = CompileShaderProgram(ShaderSource, ErrorString);
-        //if (ErrorString.E[0]) ErrorMessageBox(ErrorString.E);
         
         App->LastShaderSource = ShaderSource;
         
@@ -197,7 +196,6 @@ AppUpdateAndRender(app_state *App, f32 dT, int WindowWidth, int WindowHeight)
         }
         else
         {
-            //ErrorMessageBox(ErrorString.E);
             Win32FreeFileMemory(NewShaderSource);
         }
     }

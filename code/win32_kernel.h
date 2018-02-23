@@ -246,6 +246,12 @@ typedef HGLRC WINAPI wgl_create_context_attribs_arb(HDC hDC, HGLRC hshareContext
 internal b32
 Win32InitializeOpengl(HDC WindowDC, int MajorVersion, int MinorVersion)
 {
+    bool IsNotCoreProfile = false;
+    if (MajorVersion == 3 && MinorVersion < 3)
+    {
+        IsNotCoreProfile = true;
+    }
+
     PIXELFORMATDESCRIPTOR DesiredPixelFormat = {};
     DesiredPixelFormat.nSize = sizeof(PIXELFORMATDESCRIPTOR);
     DesiredPixelFormat.nVersion = 1;
@@ -283,7 +289,7 @@ Win32InitializeOpengl(HDC WindowDC, int MajorVersion, int MinorVersion)
         WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_DEBUG_BIT_ARB,
         WGL_CONTEXT_MAJOR_VERSION_ARB, MajorVersion,
         WGL_CONTEXT_MINOR_VERSION_ARB, MinorVersion,
-        WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+        WGL_CONTEXT_PROFILE_MASK_ARB, IsNotCoreProfile? WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB: WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
         0,
     };
     Win32RenderContext = wglCreateContextAttribsARB(WindowDC, 0, AttributeList);
