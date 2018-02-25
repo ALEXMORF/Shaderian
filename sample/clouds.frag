@@ -5,29 +5,9 @@ uniform vec2 uResolution;
 in vec2 FragCoord;
 out vec3 FragColor;
 
-float random(float x)
-{
-    return fract(sin(x) * 8384.831);
-}
-
 float random(vec2 uv)
 {
     return fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.553);
-}
-
-vec2 random2(vec2 uv)
-{
-    vec2 result = vec2(fract(sin(dot(uv, vec2(12.9898, 78.233))) * 3758.553),
-                       fract(sin(dot(uv, vec2(841.3183, 13.391))) * 8381.94));
-    result = 2.0 * result - 1.0;
-    return result;
-}
-
-float noise(float x)
-{
-    float i = floor(x);
-    float f = fract(x);
-    return mix(random(i), random(i + 1.0), smoothstep(0.0, 1.0, f));
 }
 
 float noise2d(vec2 uv)
