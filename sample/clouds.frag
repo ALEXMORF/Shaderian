@@ -1,55 +1,56 @@
-#version 330 core
+#version 330 core //or your respective version of glsl
 
-uniform float uTime;
-uniform vec2 uResolution;
-in vec2 FragCoord;
-out vec3 FragColor;
+uniform float uTime;      // time the app has been running in seconds
+uniform vec2 uResolution; // window client rect resolution in pixels
+in vec2 FragCoord;        // normalized fragment coordinate, range: <[-1, 1], [-1, 1]>
+out vec3 FragColor;       // output color
 
-float random(vec2 uv)
+float hash(vec2 uv)
 {
-    return fract(sin(dot(uv, vec2(12.9898, 78.233))) * 43758.553);
+    return fract(sin(dot(uv, vec2(81.381, 170.821))) * 8317.127);
 }
 
-float noise2d(vec2 uv)
+float noise(vec2 uv)
 {
     vec2 ipos = floor(uv);
     vec2 fpos = fract(uv);
 
-    float a = random(ipos + vec2(0.0, 0.0));
-    float b = random(ipos + vec2(1.0, 0.0));
-    float c = random(ipos + vec2(0.0, 1.0));
-    float d = random(ipos + vec2(1.0, 1.0));
+    float a = hash(ipos + vec2(0.0, 0.0));
+    float b = hash(ipos + vec2(1.0, 0.0));
+    float c = hash(ipos + vec2(0.0, 1.0));
+    float d = hash(ipos + vec2(1.0, 1.0));
 
-    vec2 u = fpos * fpos * (3.0 - 2.0 * fpos);
-
+    vec2 u = smoothstep(0.0, 1.0, fpos);
     return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
 }
 
 float fbm(vec2 uv)
 {
-    float value = 0.0;
-    float amp = 0.5;
-    float freq = 1.0;
+    float result = 0.0;
+    float total_weight = 0.0;
+
+    float amplitude = 0.5;
+    float frequency = 1.0;
 
     for (int i = 0; i < 6; ++i)
     {
-        value += amp * noise2d(freq * uv);
-        freq *= 2.4;
-        amp *= 0.5;
+        result += amplitude * noise(frequency * uv);
+        total_weight += amplitude;
+        amplitude *= 0.5;
+        frequency *= 2.0;
     }
 
-    return value;
+    result /= total_weight; //normalize
+    return result;
 }
 
 void main()
 {
     vec2 uv = FragCoord;
-    uv.x *= uResolution.x / uResolution.y;
     uv *= 5.0;
 
-    float flow_speed = -0.25;
-    float exp = 0.25;
-    float t = clamp(fbm(uv + fbm(uv + vec2(flow_speed*uTime))), 0.0, 1.0);
-    vec3 col = mix(vec3(0.0, 0.6, 0.9), vec3(0.9, 0.9, 0.9), pow(t, exp));
-    FragColor = sqrt(col);
+    float t = fbm(uv + fbm(uv + fbm(uv + 0.5*uTime) - 0.4*uTime) - 0.2*uTime);
+    vec3 col = mix(vec3(0.2, 0.6, 0.9), vec3(0.9, 0.9, 0.9), t);
+    col = sqrt(col);
+    FragColor = col;
 }
