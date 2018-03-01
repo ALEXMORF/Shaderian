@@ -40,3 +40,4 @@ Shaderian combined with your favorite editor:
 # Tutorials
 
 [getting started](https://www.youtube.com/watch?v=6BZuYtx3Uyw)
+[procedural cloud coding](https://www.youtube.com/watch?v=896DFF4Ns8E&list=UUgrzBYfN7Rz-UDuXhM5aB-Q)
