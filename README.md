@@ -39,4 +39,8 @@ Shaderian combined with your favorite editor:
 
 # Tutorials
 
+Look at the code under "sample" folder. I've written some basic shaders that does interesting things and put them there. They aren't too advanced yet so it'd be easy to digest.
+
+You can also watch this youtube video on how to get started:
+
 [getting started](https://www.youtube.com/watch?v=6BZuYtx3Uyw)
