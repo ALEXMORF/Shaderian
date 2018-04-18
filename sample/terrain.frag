@@ -7,7 +7,7 @@ out vec3 FragColor;       // output color
 
 float hash(vec2 uv)
 {
-    return fract(sin(dot(uv, vec2(73191.171, 8841.13))) * 32131.18128);
+    return fract(sin(dot(uv, vec2(73211.171, 841.13))) * 32131.18128);
 }
 
 float noise(vec2 uv)
@@ -32,7 +32,7 @@ float fbm(vec2 uv)
     float freq = 1.0;
     for (int i = 0; i < 6; ++i)
     {
-#if 1
+#if 0
         acc += amp * abs(2.0 * noise(freq * uv) - 1.0);
 #else 
         acc += amp * noise(freq * uv);
@@ -43,33 +43,44 @@ float fbm(vec2 uv)
     return acc;
 }
 
+float intersect(in vec3 ro, in vec3 rd, in float t_max, out bool hit)
+{
+    hit = false;
+    float t = 0.1;
+    
+    for (int i = 0; i < 256; ++i)
+    {
+        vec3 p = ro + t*rd;
+        float h = p.y - fbm(p.xz);
+        if (h < 0.004*t || t > t_max)
+        {
+            hit = true;
+            break;
+        }
+        
+        t += 0.45 * h;
+    }
+    return t;
+}
+
 void main()
 {
     vec2 uv = FragCoord;
     uv.x *= uResolution.x / uResolution.y;
     
     vec3 ro = vec3(0.0, 1.0, 0.0);
-    vec3 at = vec3(0.0, 0.0, 4.0);
+    vec3 at = vec3(0.0, 0.2, 4.0);
     vec3 cam_z = normalize(at - ro);
     vec3 cam_x = normalize(cross(vec3(0, 1, 0), cam_z));
     vec3 cam_y = normalize(cross(cam_z, cam_x));
     vec3 rd = cam_x * uv.x + cam_y * uv.y + 2.0 * cam_z;
     
-    bool isHit = false;
-    ro += vec3(0, 0, 2.0*uTime);
+    ro += vec3(0.0, 0.8, mod(10.0*uTime, 1000));
+    vec3 l = normalize(vec3(0.5, -0.5, 0.5));
     
-    float t = 0.1;
-    float t_max = 2.5;
-    float delta = 0.010;
-    for (; t < t_max; t += delta)
-    {
-        vec3 p = ro + t*rd;
-        if (p.y < fbm(p.xz))
-        {
-            isHit = true;
-            break;
-        }
-    }
+    bool hit;
+    float t_max = 27.5;
+    float t = intersect(ro, rd, t_max, hit);
     
     vec3 p = ro + t*rd;
     
@@ -79,19 +90,18 @@ void main()
     vec3 dpdx = vec3(px.x, fbm(px.xz), px.z);
     vec3 dpdz = vec3(pz.x, fbm(pz.xz), pz.z);
     
-    vec3 l = normalize(vec3(0.5, -0.5, 0.5));
     vec3 normal = normalize(cross(dpdz, dpdx));
     
-    vec3 background = vec3(0.8, 0.8, 0.6);
+    vec3 background = vec3(0.8, 0.8, 0.5);
     vec3 col = background;
-    if (isHit)
+    if (hit)
     {
-        float occ = pow(p.y, 0.3);
+        float occ = p.y;
         float dl = 0.25 * pow(dot(normal, -l) + 1.0, 2.0);
-        float lighting = 0.8 * dl + 0.2;
-        vec3 mat = vec3(0.7, 0.4, 0.0);
+        float lighting = 0.9 * dl + 0.3;
+        vec3 mat = vec3(0.8, 0.3, 0.0);
         
-        col = mix(occ * lighting * mat, background, pow(t / t_max, 2.0));
+        col = mix(occ * lighting * mat, background, pow(t / t_max, 1.5));
     }
     
     FragColor = col;
