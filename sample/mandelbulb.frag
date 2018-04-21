@@ -10,11 +10,11 @@ out vec3 FragColor;       // output color
 
 float de_mandelbulb(in vec3 p)
 {
-    float power = min(8, 0.25*uTime + 1);
+    float power = 8;
     
     vec3 w = p;
     float dw = 1.0;
-    for (int i = 0; i < 9; ++i)
+    for (int i = 0; i < 4; ++i)
     {
         //gradient:
         dw = power * pow(length(w), power-1) * dw + 1;
