@@ -10,7 +10,7 @@ out vec3 FragColor;       // output color
 
 float de_mandelbulb(in vec3 p)
 {
-    float power = min(8, 0.25*uTime);
+    float power = min(8, 0.25*uTime + 1);
     
     vec3 w = p;
     float dw = 1.0;
