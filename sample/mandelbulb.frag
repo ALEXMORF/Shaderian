@@ -12,9 +12,9 @@ float de_mandelbulb(in vec3 p)
 {
     float power = 8;
     
-    vec3 w = p;
+    vec3 w = vec3(p);
     float dw = 1.0;
-    for (int i = 0; i < 4; ++i)
+    for (int i = 0; i < 9; ++i)
     {
         //gradient:
         dw = power * pow(length(w), power-1) * dw + 1;
@@ -42,7 +42,7 @@ float de_mandelbulb(in vec3 p)
         }
     }
     
-    float d = 0.50*length(w) * log(length(w)) / dw;
+    float d = 0.50 * length(w) * log(length(w)) / dw;
     return d;
 }
 
@@ -77,6 +77,14 @@ vec3 map_n(in vec3 p)
     return noz(vec3(map(p + e.yxx), map(p + e.xyx), map(p + e.xxy)) - map(p));
 }
 
+vec3 calc_ambient(in vec3 rd)
+{
+    vec3 col1 = vec3(0.4);
+    vec3 col2 = vec3(0.3, 0.5, 0.7);
+    vec3 col = mix(col1, col2, 0.5*rd.y + 0.5);
+    return col;
+}
+
 void main()
 {
     vec2 uv = FragCoord;
@@ -85,6 +93,7 @@ void main()
     float time = 0.05*uTime;
     float radius = 1.7;
     vec3 ro = vec3(radius*cos(time), radius*sin(time), radius*sin(time));
+    //ro = vec3(0, 1, -2);
     vec3 at = vec3(0);
     vec3 cam_z = noz(at - ro);
     vec3 cam_x = noz(cross(vec3(0,1,0), cam_z));
@@ -94,7 +103,7 @@ void main()
     float t = 0.001;
     float t_max = 50.0;
     float iter = 0;
-    float iter_max = 256;
+    float iter_max = 216;
     int matid = -1;
     for (int i = 0; i < iter_max && t < t_max; ++i)
     {
@@ -109,13 +118,17 @@ void main()
     }
     
     float occ = iter / iter_max;
-    vec3 col  = vec3(0);
+    vec3 col;
     if (matid != -1)
     {
         vec3 n = map_n(ro + t*rd);
-        vec3 l = -noz(vec3(0.5, -0.5, 0.8));
+        vec3 l = -noz(vec3(0.5, -0.9, 0.8));
         float shad = _dot(n, l);
-        col = vec3(occ) + 0.2 + 0.8 * shadow(ro + t*rd, l) * shad * vec3(1);
+        col = 0.4*(vec3(-occ) + calc_ambient(n)) + 0.6 * shadow(ro + t*rd, l) * shad * vec3(1);
     }
-    FragColor = sqrt(col);
+    else
+    {
+        col = calc_ambient(rd);
+    }
+    FragColor = col;
 }
