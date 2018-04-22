@@ -176,7 +176,7 @@ Win32CreateWindow(HINSTANCE InstanceHandle, i32 WindowWidth, i32 WindowHeight,
     }
     
     HWND Window = CreateWindowEx(
-        WS_EX_TOPMOST,
+        0, //WS_EX_TOPMOST,
         WindowClassName,
         WindowName,
         WindowStyle, 
@@ -251,7 +251,7 @@ Win32InitializeOpengl(HDC WindowDC, int MajorVersion, int MinorVersion)
     {
         IsNotCoreProfile = true;
     }
-
+    
     PIXELFORMATDESCRIPTOR DesiredPixelFormat = {};
     DesiredPixelFormat.nSize = sizeof(PIXELFORMATDESCRIPTOR);
     DesiredPixelFormat.nVersion = 1;

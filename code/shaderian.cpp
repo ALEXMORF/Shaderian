@@ -1,7 +1,6 @@
 /*
 TODO(chen):
 
-. Dynamically capture the working directory, no matter where the executable is
 . Change shaderian's interface function to mainImage() style, like shadertoy
 
 */
@@ -170,10 +169,68 @@ AppUpdateAndRender(app_state *App, f32 dT, int WindowWidth, int WindowHeight)
         string ErrorString = STACK_STRING(Buffer);
         
         App->Program = CompileShaderProgram(ShaderSource, ErrorString);
-        
         App->LastShaderSource = ShaderSource;
         
         App->IsInitialized = true;
+    }
+    
+    if (App->BufferWidth != WindowWidth || App->BufferHeight != WindowHeight)
+    {
+        App->BufferWidth = WindowWidth;
+        App->BufferHeight = WindowHeight;
+        
+        for (int BufferIndex = 0; BufferIndex < ARRAY_COUNT(App->Buffers); ++BufferIndex)
+        {
+            GLuint *BufferHandle = &App->Buffers[BufferIndex].Handle;
+            GLuint *BufferTexture = &App->Buffers[BufferIndex].Texture;
+            GLuint *BufferRenderbuffer = &App->Buffers[BufferIndex].Renderbuffer;
+            
+            if (*BufferHandle)
+            {
+                glDeleteFramebuffers(1, BufferHandle);
+            }
+            if (*BufferTexture)
+            {
+                glDeleteTextures(1, BufferTexture);
+            }
+            if (*BufferRenderbuffer)
+            {
+                glDeleteRenderbuffers(1, BufferRenderbuffer);
+            }
+            
+            glGenFramebuffers(1, BufferHandle);
+            glBindFramebuffer(GL_FRAMEBUFFER, *BufferHandle);
+            
+            //bind color attachment
+            glGenTextures(1, BufferTexture);
+            glBindTexture(GL_TEXTURE_2D, *BufferTexture);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);	
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, WindowWidth, WindowHeight, 0, 
+                         GL_RGB, GL_UNSIGNED_BYTE, 0);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 
+                                   GL_TEXTURE_2D, *BufferTexture, 0); 
+            
+            //render buffer
+            glGenRenderbuffers(1, BufferRenderbuffer);
+            glBindRenderbuffer(GL_RENDERBUFFER, *BufferRenderbuffer);
+            glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WindowWidth, WindowHeight);  
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, 
+                                      GL_RENDERBUFFER, *BufferRenderbuffer);  
+            glBindRenderbuffer(GL_RENDERBUFFER, 0);
+            
+            GLenum Completeness = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+            ASSERT(Completeness == GL_FRAMEBUFFER_COMPLETE); //GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            
+            glBindFramebuffer(GL_FRAMEBUFFER, *BufferHandle);
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
     }
     
     if (FileHasBeenUpdated(App->ShaderFilename, App->ShaderLastWriteTime))
@@ -200,15 +257,33 @@ AppUpdateAndRender(app_state *App, f32 dT, int WindowWidth, int WindowHeight)
         }
     }
     
-    App->TimeInSeconds += dT;
-    
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+    
+    int CurrentBufferIndex = App->CurrentBufferIndex;
+    int LastBufferIndex = (App->CurrentBufferIndex + 1) % 2;
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, App->Buffers[CurrentBufferIndex].Handle);
     
     glUseProgram(App->Program);
     glUploadVec2(App->Program, "uResolution", V2(WindowWidth, WindowHeight));
     glUploadFloat(App->Program, "uTime", App->TimeInSeconds);
+    glUploadInt32(App->Program, "uFrameIndex", App->FrameIndex);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, App->Buffers[LastBufferIndex].Handle);
+    glUploadInt32(App->Program, "uPrevFrame", 0);
     glBindVertexArray(App->ScreenQuadVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, App->Buffers[CurrentBufferIndex].Handle);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glBlitFramebuffer(0, 0, WindowWidth, WindowHeight, 0, 0, WindowWidth, WindowHeight,
+                      GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    
+    App->TimeInSeconds += dT;
+    App->FrameIndex += 1;
+    App->CurrentBufferIndex = (App->CurrentBufferIndex + 1) % 2;
 }
