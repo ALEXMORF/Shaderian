@@ -10,6 +10,8 @@ shaderian.exe [shader filename] [option]
 
 shazan - create an opengl 3.0 context instead of 3.3 core profile context
 
+
+
 # Starter code
 
 This is the starter code, just copy paste this into your shader and start from there. 
@@ -30,6 +32,13 @@ void main()
 //your code
 }
 ```
+
+# New Feature: Access to previous frame and frame indexer
+
+This allows you to propogate information throughout all your frames. It is particularly powerful because it allows you do this stuff
+like progressive pathtracing and simulations with ease:
+
+![base profile screenshot 2018 04 22 - 13 22 33 57](https://user-images.githubusercontent.com/16845654/39100342-4f3381fc-463d-11e8-9d3d-3843d40edb53.png)
 
 # Integration with your editor
 
