@@ -176,7 +176,7 @@ Win32CreateWindow(HINSTANCE InstanceHandle, i32 WindowWidth, i32 WindowHeight,
     }
     
     HWND Window = CreateWindowEx(
-        0, //WS_EX_TOPMOST,
+        WS_EX_TOPMOST,
         WindowClassName,
         WindowName,
         WindowStyle, 
