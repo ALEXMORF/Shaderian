@@ -1,7 +1,10 @@
 #version 330 core //or your respective version of glsl
 
 uniform float uTime;      // time the app has been running in seconds
+uniform int uFrameIndex;
+uniform sampler2D uPrevFrame;
 uniform vec2 uResolution; // window client rect resolution in pixels
+
 in vec2 FragCoord;        // normalized fragment coordinate, range: <[-1, 1], [-1, 1]>
 out vec3 FragColor;       // output color
 
@@ -88,6 +91,7 @@ vec3 calc_ambient(in vec3 rd)
 void main()
 {
     vec2 uv = FragCoord;
+    
     uv.x *= uResolution.x / uResolution.y;
     
     float time = 0.05*uTime;
