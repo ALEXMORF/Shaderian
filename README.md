@@ -40,6 +40,8 @@ like progressive pathtracing and simulations with ease:
 
 ![base profile screenshot 2018 04 22 - 13 22 33 57](https://user-images.githubusercontent.com/16845654/39100342-4f3381fc-463d-11e8-9d3d-3843d40edb53.png)
 
+(Rendered with shaderian, you can find this shader as sample/fractal_pathtracer.frag)
+
 # Integration with your editor
 
 When shaderian is deactivated, it will stay as a layered window, and you can still edit the file while seeing changes. 
