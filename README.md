@@ -19,6 +19,9 @@ This is the starter code, just copy paste this into your shader and start from t
 
 uniform float uTime;      // time the app has been running in seconds
 uniform vec2 uResolution; // window client rect resolution in pixels
+uniform int uFrameIndex;  // the count of frames that's been run before current frame
+uniform sampler2D uPrevFrame;  // access to previous frame as texture
+
 in vec2 FragCoord;        // normalized fragment coordinate, range: <[-1, 1], [-1, 1]>
 out vec3 FragColor;       // output color
 
