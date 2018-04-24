@@ -63,8 +63,7 @@ float map(in vec3 p)
 {
     float menger = sd_menger(p - vec3(0, 1.0, 0));
     float floor = p.y;
-    float sphere = length(p - vec3(2.2, 1, 0)) - 1;
-    return min(floor, min(menger, sphere));
+    return min(floor, menger);
 }
 
 vec3 map_normal(in vec3 p)
