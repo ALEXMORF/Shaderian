@@ -63,7 +63,8 @@ float map(in vec3 p)
 {
     float menger = sd_menger(p - vec3(0, 1.0, 0));
     float floor = p.y;
-    return min(floor, menger);
+    float sphere = length(p - vec3(2.2, 1, 0)) - 1;
+    return min(floor, min(menger, sphere));
 }
 
 vec3 map_normal(in vec3 p)
@@ -108,14 +109,27 @@ vec3 direct_render(in vec3 ro, in vec3 rd)
     return col;
 }
 
+vec3 sample_sky(vec3 rd)
+{
+    vec3 sky = vec3(0.5, 0.6, 0.7);
+    vec3 sun = vec3(2.0, 2.0, 0.6);
+    vec3 sun_l = noz(vec3(-0.5, 0.9, -0.5));
+    
+    float angle_cosine = dot(sun_l, noz(rd));
+    if (abs(angle_cosine) > 0.7)
+    {
+        return sun;
+    }
+    return sky;
+}
+
 vec3 pathtrace_render(in vec3 ro, in vec3 rd)
 {
     vec3 mat = vec3(0.6, 0.5, 0.5);
-    vec3 sky = vec3(1.0, 1.0, 0.5);
     vec3 radiance = vec3(0);
     vec3 attenuation = vec3(1);
     
-    for (int bounce = 0; bounce < 8; ++bounce)
+    for (int bounce = 0; bounce < 32; ++bounce)
     {
         bool hit = false;
         float t = 0.01;
@@ -147,7 +161,7 @@ vec3 pathtrace_render(in vec3 ro, in vec3 rd)
         }
         else
         {
-            radiance += attenuation * sky;
+            radiance += attenuation * sample_sky(rd);
             break;
         }
     }
@@ -171,10 +185,15 @@ void main()
     
 #if 1
     vec3 prev_contrib = texture(uPrevFrame, tex_coord).rgb;
+    prev_contrib = pow(prev_contrib, vec3(2)); //gamma -> linear
+    
     vec3 contrib = pathtrace_render(ro, rd);
+    contrib = contrib / (1 + contrib);
     
     float sample_count = uFrameIndex + 1;
-    FragColor = prev_contrib * (sample_count - 1) / sample_count + contrib * (1 / sample_count);
+    vec3 total_contrib = prev_contrib * (sample_count - 1) / sample_count + contrib * (1 / sample_count);
+    
+    FragColor = sqrt(total_contrib); //linear -> gamma
 #else
     FragColor = direct_render(ro, rd);
 #endif
