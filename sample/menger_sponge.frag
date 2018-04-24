@@ -132,7 +132,7 @@ vec3 pathtrace_render(in vec3 ro, in vec3 rd)
     {
         bool hit = false;
         float t = 0.01;
-        for (int i = 0; i < 256; ++i)
+        for (int i = 0; i < 256 && t < 200; ++i)
         {
             float d = map(ro + t*rd);
             if (d < 0.001)

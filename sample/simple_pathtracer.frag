@@ -69,7 +69,7 @@ vec3 pathtrace_render(in vec2 uv)
     {
         float t = 0.1;
         int matid = -1;
-        for (int i = 0; i < 256; ++i)
+        for (int i = 0; i < 256 && t < 200; ++i)
         {
             int curr_matid;
             float d = map(next_ro + t*next_n, curr_matid);
