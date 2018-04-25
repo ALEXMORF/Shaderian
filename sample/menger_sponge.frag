@@ -24,9 +24,9 @@ float sd_box(in vec3 p)
 
 float sd_cross(in vec3 p)
 {
-    float arm1 = max(abs(p.x), abs(p.y)) - 0.33;
-    float arm2 = max(abs(p.x), abs(p.z)) - 0.33;
-    float arm3 = max(abs(p.y), abs(p.z)) - 0.33;
+    float arm1 = max(abs(p.x), abs(p.y)) - 0.5;
+    float arm2 = max(abs(p.x), abs(p.z)) - 0.5;
+    float arm3 = max(abs(p.y), abs(p.z)) - 0.5;
     return min(arm1, min(arm2, arm3));
 }
 
@@ -39,37 +39,49 @@ mat2 rotate2d(in float a)
 
 float sd_menger(in vec3 p)
 {
-    float d  = sd_box(p);
+    float d = sd_box(p);
     
     float s = 1.0;
     for(int i = 0; i < 3; i++)
     {
-        vec3 a = mod(p*s, 2.0 )-1.0;
+        vec3 a = mod(p*s, 2.0) - 1.0;
         s *= 3.0;
         vec3 r = 1.0 - 3.0*abs(a);
         
-        float c = sd_cross(r)/s;
-        d = max(d,-c);
+        float c = sd_cross(r) / s;
+        d = max(d, -c);
         
         p -= 1.0;
         p.xy *= rotate2d(1.5);
-        p += 2.2;
+        p += 2.2 * sign(p);
     }
     
     return d;
 }
 
-float map(in vec3 p)
+float map(in vec3 p, out int id)
 {
-    float menger = sd_menger(p - vec3(0, 1.0, 0));
+    float menger = sd_menger(p - vec3(0, 1, 0));
     float floor = p.y;
-    return min(floor, menger);
+    float d = min(floor, menger);
+    
+    if (d == floor)
+    {
+        id = 0;
+    }
+    if (d == menger)
+    {
+        id = 1;
+    }
+    
+    return d;
 }
 
 vec3 map_normal(in vec3 p)
 {
     vec2 e = vec2(0, 0.001);
-    return noz(vec3(map(p + e.yxx), map(p + e.xyx), map(p + e.xxy)) - map(p));
+    int id;
+    return noz(vec3(map(p + e.yxx, id), map(p + e.xyx, id), map(p + e.xxy, id)) - map(p, id));
 }
 
 vec3 direct_render(in vec3 ro, in vec3 rd)
@@ -82,7 +94,8 @@ vec3 direct_render(in vec3 ro, in vec3 rd)
     float iter = 0;
     for (int i = 0; i < int(iter_max) && t < t_max; ++i)
     {
-        float d = map(ro + t*rd);
+        int garbage;
+        float d = map(ro + t*rd, garbage);
         if (d < 0.001)
         {
             iter = float(i);
@@ -111,7 +124,7 @@ vec3 direct_render(in vec3 ro, in vec3 rd)
 vec3 sample_sky(vec3 rd)
 {
     vec3 sky = vec3(0.5, 0.6, 0.7);
-    vec3 sun = vec3(2.0, 2.0, 0.6);
+    vec3 sun = 3*vec3(2.0, 2.0, 0.6);
     vec3 sun_l = noz(vec3(-0.5, 0.9, -0.5));
     
     float angle_cosine = dot(sun_l, noz(rd));
@@ -122,29 +135,47 @@ vec3 sample_sky(vec3 rd)
     return sky;
 }
 
+vec3 mat_lookup(in int id)
+{
+    if (id == 0)
+    {
+        return vec3(0.6, 0.6, 0.5);
+    }
+    else if (id == 1)
+    {
+        return vec3(0.1, 0.6, 0.5);
+    }
+    else
+    {
+        return vec3(0);
+    }
+}
+
 vec3 pathtrace_render(in vec3 ro, in vec3 rd)
 {
-    vec3 mat = vec3(0.6, 0.5, 0.5);
     vec3 radiance = vec3(0);
     vec3 attenuation = vec3(1);
     
-    for (int bounce = 0; bounce < 32; ++bounce)
+    for (int bounce = 0; bounce < 8; ++bounce)
     {
-        bool hit = false;
+        int id = -1;
         float t = 0.01;
         for (int i = 0; i < 256 && t < 200; ++i)
         {
-            float d = map(ro + t*rd);
+            int curr_id;
+            float d = map(ro + t*rd, curr_id);
             if (d < 0.001)
             {
-                hit = true;
+                id = curr_id;
                 break;
             }
             t += d;
         }
         
-        if (hit)
+        if (id != -1)
         {
+            vec3 mat = mat_lookup(id);
+            
             attenuation *= mat;
             
             ro = ro + t*rd;
@@ -173,6 +204,13 @@ void main()
     vec2 tex_coord = 0.5 * FragCoord + 0.5;
     vec2 uv = FragCoord;
     uv.x *= uResolution.x / uResolution.y;
+    
+    vec2 duvdx = dFdx(uv);
+    vec2 duvdy = dFdy(uv);
+    vec2 w = max(duvdx, duvdy);
+    
+    uv.x += 0.5 * w.x * (2.0 * hash(length(uv) + 921.1 + 11.3*float(uFrameIndex)) - 1.0);
+    uv.y += 0.5 * w.y * (2.0 * hash(length(uv) + 71.5 + 23.1*float(uFrameIndex)) - 1.0);
     
     float time = 1.1;
     vec3 ro = vec3(4 * cos(time), 2.5, -4 * sin(time));
