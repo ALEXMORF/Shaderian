@@ -264,6 +264,6 @@ void main()
     vig_uv *= 1.0 - vig_uv;
     float vig = pow(vig_uv.x * vig_uv.y * 15, 0.15);
     
-    col = col / (1 + col);
+    col = vec3(1) - exp(-col * 3.0);
     FragColor = vig * sqrt(col);
 }
