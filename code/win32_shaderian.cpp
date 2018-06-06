@@ -20,6 +20,7 @@ typedef int b32;
 #define ASSERT(Value) do { if (!(Value)) *(int *)0 = 0; } while (0)
 
 #include <windows.h>
+#include <ShellScalingAPI.h>
 #include "win32_kernel.h"
 
 #include "shaderian.cpp"
@@ -130,6 +131,8 @@ int main(int ArgumentCount, char **ArgumentList)
     {
         snprintf(FullShaderPath, sizeof(FullShaderPath), "%s\\%s", CurrentDirectory, ShaderFilename);
     }
+    
+    SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
     
     //initialize platform stuff
     HINSTANCE InstanceHandle = GetModuleHandle(0);
