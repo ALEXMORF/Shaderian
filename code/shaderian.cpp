@@ -1,10 +1,3 @@
-/*
-TODO(chen):
-
-. Change shaderian's interface function to mainImage() style, like shadertoy
-
-*/
-
 #include "shaderian.h"
 
 inline GLuint
@@ -153,6 +146,20 @@ FileHasBeenUpdated(char *Filename, FILETIME OldLastWriteTime)
 }
 
 internal void
+RewindAppState(app_state *App)
+{
+    App->TimeInSeconds = 0.0f;
+    App->FrameIndex = 0;
+    App->CurrentBufferIndex = 0;
+    
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, App->Buffers[0].Handle);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, App->Buffers[1].Handle);
+    glClear(GL_COLOR_BUFFER_BIT);
+}
+
+internal void
 AppUpdateAndRender(app_state *App, f32 dT, int WindowWidth, int WindowHeight)
 {
     if (!App->IsInitialized)
@@ -178,6 +185,7 @@ AppUpdateAndRender(app_state *App, f32 dT, int WindowWidth, int WindowHeight)
     {
         App->BufferWidth = WindowWidth;
         App->BufferHeight = WindowHeight;
+        RewindAppState(App);
         
         for (int BufferIndex = 0; BufferIndex < ARRAY_COUNT(App->Buffers); ++BufferIndex)
         {
@@ -247,9 +255,10 @@ AppUpdateAndRender(app_state *App, f32 dT, int WindowWidth, int WindowHeight)
         {
             glDeleteProgram(App->Program);
             Win32FreeFileMemory(App->LastShaderSource);
-            
             App->LastShaderSource = NewShaderSource;
             App->Program = NewProgram;
+            
+            RewindAppState(App);
         }
         else
         {
@@ -257,6 +266,7 @@ AppUpdateAndRender(app_state *App, f32 dT, int WindowWidth, int WindowHeight)
         }
     }
     
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     
@@ -279,7 +289,6 @@ AppUpdateAndRender(app_state *App, f32 dT, int WindowWidth, int WindowHeight)
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     
     glBindFramebuffer(GL_READ_FRAMEBUFFER, App->Buffers[CurrentBufferIndex].Handle);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     glBlitFramebuffer(0, 0, WindowWidth, WindowHeight, 0, 0, WindowWidth, WindowHeight,
                       GL_COLOR_BUFFER_BIT, GL_NEAREST);
     

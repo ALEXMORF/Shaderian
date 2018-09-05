@@ -98,25 +98,33 @@ bool StringStartsWith(char *A, char *Header)
 int main(int ArgumentCount, char **ArgumentList) 
 {
     bool ShazanMode = false;
+    bool RenderOffline = false;
     
-    if (ArgumentCount != 2 && ArgumentCount != 3)
+    if (ArgumentCount < 2)
     {
         printf("Usage: shaderian [fragment shader file] [options]\n");
         return -1;
     }
     char *ShaderFilename = ArgumentList[1];
     
-    if (ArgumentCount == 3)
+    if (ArgumentCount > 3)
     {
-        char *Option = ArgumentList[2];
-        if (StringEqual(Option, "shazan"))
+        for (int ArgIndex = 2; ArgIndex < ArgumentCount; ++ArgIndex)
         {
-            ShazanMode = true;
-        }
-        else
-        {
-            printf("%s is not a valid option\n", Option);
-            return -1;
+            char *Option = ArgumentList[ArgIndex];
+            if (StringEqual(Option, "shazan"))
+            {
+                ShazanMode = true;
+            }
+            else if (StringEqual(Option, "offline"))
+            {
+                RenderOffline = true;
+            }
+            else
+            {
+                printf("%s is not a valid option\n", Option);
+                return -1;
+            }
         }
     }
     
