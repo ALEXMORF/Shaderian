@@ -182,7 +182,7 @@ RewindAppState(app_state *App)
 }
 
 internal void
-AppUpdateAndRender(app_state *App, f32 dT, int WindowWidth, int WindowHeight)
+AppUpdateAndRender(app_state *App, f32 dT, int WindowWidth, int WindowHeight, b32 NeedsRefresh)
 {
     if (!App->IsInitialized)
     {
@@ -210,7 +210,8 @@ AppUpdateAndRender(app_state *App, f32 dT, int WindowWidth, int WindowHeight)
         App->IsInitialized = true;
     }
     
-    if (App->BufferWidth != WindowWidth || App->BufferHeight != WindowHeight)
+    if (NeedsRefresh || 
+        App->BufferWidth != WindowWidth || App->BufferHeight != WindowHeight)
     {
         App->BufferWidth = WindowWidth;
         App->BufferHeight = WindowHeight;

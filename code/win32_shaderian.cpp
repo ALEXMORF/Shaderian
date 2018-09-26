@@ -188,6 +188,7 @@ int main(int ArgumentCount, char **ArgumentList)
     {
         u64 BeginCounter = Win32GetPerformanceCounter();
         
+        b32 NeedsRefresh = false;
         MSG Message;
         while (PeekMessage(&Message, 0, 0, 0, PM_REMOVE))
         {
@@ -206,6 +207,11 @@ int main(int ArgumentCount, char **ArgumentList)
                     {
                         if (KeyIsDown)
                         {
+                            if (Message.wParam == VK_F5)
+                            {
+                                NeedsRefresh = true;
+                            }
+                            
                             if (Message.wParam == VK_ESCAPE)
                             {
                                 gAppIsRunning = false;
@@ -233,7 +239,7 @@ int main(int ArgumentCount, char **ArgumentList)
             
         }
         
-        AppUpdateAndRender(&AppState, LastFrameTimeInS, gWindowWidth, gWindowHeight);
+        AppUpdateAndRender(&AppState, LastFrameTimeInS, gWindowWidth, gWindowHeight, NeedsRefresh);
         SwapBuffers(GetDC(Window));
         
         u64 ElapsedCounter = Win32GetPerformanceCounter();
