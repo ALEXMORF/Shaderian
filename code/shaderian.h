@@ -1,3 +1,6 @@
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 struct string
 {
     int Capacity;
@@ -18,6 +21,13 @@ struct app_state
     char *LastShaderSource;
     char *ShaderFilename;
     FILETIME ShaderLastWriteTime;
+    
+    GLuint GraceHdrMap;
+    GLuint GlacierHdrMap;
+    GLuint UffiziHdrMap;
+    GLuint EnnisHdrMap;
+    GLuint PisaHdrMap;
+    GLuint DogeHdrMap;
     
     GLuint ScreenQuadVAO;
     GLuint Program;

@@ -118,6 +118,28 @@ CompileShaderProgram(char *FragShaderSrc, string ErrorMessage = {},
     return Program;
 }
 
+internal GLuint
+UploadHdrMap(char *Path)
+{
+    GLuint HdrMap = 0;
+    glGenTextures(1, &HdrMap);
+    glBindTexture(GL_TEXTURE_2D, HdrMap);
+    {
+        int Width, Height, ChannelCount;
+        f32 *Data = stbi_loadf(Path, &Width, &Height, &ChannelCount, 0);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, Width, Height, 
+                     0, GL_RGB, GL_FLOAT, Data);
+        stbi_image_free(Data);
+    }
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);  
+    glBindTexture(GL_TEXTURE_2D, 0);
+    return HdrMap;
+}
+
 inline FILETIME
 GetFileLastWriteTime(char *Filename)
 {
@@ -174,9 +196,16 @@ AppUpdateAndRender(app_state *App, f32 dT, int WindowWidth, int WindowHeight)
         
         char Buffer[1024] = {};
         string ErrorString = STACK_STRING(Buffer);
-        
         App->Program = CompileShaderProgram(ShaderSource, ErrorString);
         App->LastShaderSource = ShaderSource;
+        
+        stbi_set_flip_vertically_on_load(true);
+        App->GraceHdrMap = UploadHdrMap("../data/grace-new.hdr");
+        App->GlacierHdrMap = UploadHdrMap("../data/glacier.hdr");
+        App->UffiziHdrMap = UploadHdrMap("../data/uffizi-large.hdr");
+        App->EnnisHdrMap = UploadHdrMap("../data/ennis.hdr");
+        App->PisaHdrMap = UploadHdrMap("../data/pisa.hdr");
+        App->DogeHdrMap = UploadHdrMap("../data/doge2.hdr");
         
         App->IsInitialized = true;
     }
@@ -257,8 +286,6 @@ AppUpdateAndRender(app_state *App, f32 dT, int WindowWidth, int WindowHeight)
             Win32FreeFileMemory(App->LastShaderSource);
             App->LastShaderSource = NewShaderSource;
             App->Program = NewProgram;
-            
-            RewindAppState(App);
         }
         else
         {
@@ -276,15 +303,37 @@ AppUpdateAndRender(app_state *App, f32 dT, int WindowWidth, int WindowHeight)
     glBindFramebuffer(GL_FRAMEBUFFER, App->Buffers[CurrentBufferIndex].Handle);
     
     glUseProgram(App->Program);
-    glUploadVec2(App->Program, "uResolution", V2(WindowWidth, WindowHeight));
-    glUploadFloat(App->Program, "uTime", App->TimeInSeconds);
-    glUploadInt32(App->Program, "uFrameIndex", App->FrameIndex);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, App->Buffers[LastBufferIndex].Handle);
-    glUploadInt32(App->Program, "uPrevFrame", 0);
-    glBindVertexArray(App->ScreenQuadVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
+    {
+        glUploadVec2(App->Program, "uResolution", V2(WindowWidth, WindowHeight));
+        glUploadFloat(App->Program, "uTime", App->TimeInSeconds);
+        glUploadInt32(App->Program, "uFrameIndex", App->FrameIndex);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, App->Buffers[LastBufferIndex].Handle);
+        glUploadInt32(App->Program, "uPrevFrame", 0);
+        
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, App->GraceHdrMap);
+        glUniform1i(glGetUniformLocation(App->Program, "GraceCathedral"), 1);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, App->GlacierHdrMap);
+        glUniform1i(glGetUniformLocation(App->Program, "Glacier"), 2);
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, App->GlacierHdrMap);
+        glUniform1i(glGetUniformLocation(App->Program, "UffiziGallery"), 3);
+        glActiveTexture(GL_TEXTURE4);
+        glBindTexture(GL_TEXTURE_2D, App->EnnisHdrMap);
+        glUniform1i(glGetUniformLocation(App->Program, "EnnisDiningRoom"), 4);
+        glActiveTexture(GL_TEXTURE5);
+        glBindTexture(GL_TEXTURE_2D, App->PisaHdrMap);
+        glUniform1i(glGetUniformLocation(App->Program, "PisaCourtyard"), 5);
+        glActiveTexture(GL_TEXTURE6);
+        glBindTexture(GL_TEXTURE_2D, App->DogeHdrMap);
+        glUniform1i(glGetUniformLocation(App->Program, "DogeCourtyard"), 6);
+        
+        glBindVertexArray(App->ScreenQuadVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
+    }
     
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     

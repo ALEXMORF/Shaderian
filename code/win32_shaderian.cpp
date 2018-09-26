@@ -57,7 +57,6 @@ Win32WindowCallback(HWND Window, UINT Message, WPARAM Wparam, LPARAM Lparam)
             }
         } break;
         
-        
         default:
         {
             Result = DefWindowProc(Window, Message, Wparam, Lparam);

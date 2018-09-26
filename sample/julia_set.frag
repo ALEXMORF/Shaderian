@@ -5,6 +5,12 @@ uniform vec2 uResolution; // window client rect resolution in pixels
 
 uniform int uFrameIndex;
 uniform sampler2D uPrevFrame;
+uniform sampler2D GraceCathedral;
+uniform sampler2D Glacier;
+uniform sampler2D UffiziGallery;
+uniform sampler2D EnnisDiningRoom;
+uniform sampler2D PisaCourtyard;
+uniform sampler2D DogeCourtyard;
 
 in vec2 FragCoord;        // normalized fragment coordinate, range: <[-1, 1], [-1, 1]>
 out vec3 FragColor;       // output color
@@ -32,14 +38,14 @@ mat2 rotate2d(in float a)
 
 float de_julia_set(in vec3 p, out float t)
 {
-    vec4 c = vec4(0.0, 0.3, 0.9, 0.0);
+    vec4 c = vec4(0.0, 0.3, 0.8, 0.0);
     
     vec4 z = vec4(0, p);
     float dz = 1;
     for (int i = 0; i < 8; ++i)
     {
         dz = 2.0 * length(z) * dz;
-        //z.xy *= rotate2d(pi);
+        z.xy *= rotate2d(3.14);
         z = q_mul(z, z) + c;
         if (length(z) > 256)
         {
@@ -74,9 +80,9 @@ float de_mandelbrot(in vec3 p, out float t)
 
 float map(in vec3 p, out float t)
 {
-    float floor = p.y;
     float julia = de_julia_set(p - vec3(0, 1.5, 0), t);
-    return min(floor, julia);
+    float sphere = length(p - vec3(0, 1.5, 0)) - 1.0;
+    return julia;
 }
 
 vec3 map_n(in vec3 p)
@@ -107,13 +113,24 @@ float shadow(in vec3 p, in vec3 l)
     return res;
 }
 
+vec3 sample_env(vec3 rd)
+{
+    rd = normalize(rd);
+    const vec2 invAtan = vec2(0.1591, 0.3183);
+    vec2 uv = vec2(atan(rd.z, rd.x), asin(rd.y));
+    uv *= invAtan;
+    uv += 0.5;
+    
+    return texture(GraceCathedral, uv).rgb;
+}
+
 vec3 render(in vec2 uv)
 {
     float time = 2.2;
     time = 0.3*uTime;
-    float r = 4.0;
+    float r = 3.0;
     vec3 ro = vec3(r * cos(time), 2, -r * sin(time));
-    vec3 at = vec3(0, 1.2, 0);
+    vec3 at = vec3(0, 1.5, 0);
     vec3 cam_z = noz(at - ro);
     vec3 cam_x = noz(cross(vec3(0, 1, 0), cam_z));
     vec3 cam_y = noz(cross(cam_z, cam_x));
@@ -140,22 +157,19 @@ vec3 render(in vec2 uv)
     float occ = 1 - (iter / iter_max);
     
     vec3 p = ro + t*rd;
-    vec3 background = vec3(0);
+    vec3 background = sample_env(rd);
     vec3 col = background;
     if (julia_t != -1.0)
     {
         vec3 n = map_n(p);
+        vec3 v = normalize(p - ro);
+        vec3 l = reflect(v, n);
         
-        vec3 lp = vec3(4, 4, 0);
-        vec3 lcol = vec3(15);
-        vec3 l = -noz(p - lp);
-        
-        vec3 amb = vec3(1.0);
-        vec3 diff = shadow(p, l) * lcol * _dot(n, l) * vec3(1) / dot(p-lp,p-lp);;
-        
-        vec3 shad = 0.3 * amb + 0.7 * diff;
-        col = occ * shad * vec3(0.8);
-        col = mix(col, background, t / t_max);
+        vec3 reflection = sample_env(l);
+        vec3 F0 = vec3(1.0, 0.734, 0.344);
+        vec3 fresnel = F0 + (vec3(1.0) - F0) * pow(1.0 - max(0.0, dot(-v,n)), 5.0);
+        vec3 radiance = reflection * fresnel;
+        col = occ * radiance;
     }
     
     return col;
@@ -169,7 +183,7 @@ void main()
     vec2 _w = max(dFdx(uv), dFdy(uv));
     float w = 0.5 * max(_w.x, _w.y);
     
-#define AA 2
+#define AA 1
     vec3 col = vec3(0);
     for (int y = 0; y < AA; ++y)
     {
@@ -180,5 +194,8 @@ void main()
         }
     }
     col /= AA*AA;
+    
+    col = 1.0-exp(-col);
+    col = sqrt(col);
     FragColor = col;
 }
