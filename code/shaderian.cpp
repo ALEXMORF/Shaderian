@@ -307,9 +307,10 @@ AppUpdateAndRender(app_state *App, f32 dT, int WindowWidth, int WindowHeight)
         glUploadVec2(App->Program, "uResolution", V2(WindowWidth, WindowHeight));
         glUploadFloat(App->Program, "uTime", App->TimeInSeconds);
         glUploadInt32(App->Program, "uFrameIndex", App->FrameIndex);
+        
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, App->Buffers[LastBufferIndex].Handle);
-        glUploadInt32(App->Program, "uPrevFrame", 0);
+        glBindTexture(GL_TEXTURE_2D, App->Buffers[LastBufferIndex].Texture);
+        glUniform1i(glGetUniformLocation(App->Program, "uPrevFrame"), 0);
         
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, App->GraceHdrMap);
