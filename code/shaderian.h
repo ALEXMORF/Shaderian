@@ -42,5 +42,6 @@ struct app_state
     b32 IsInitialized;
 };
 
-typedef void get_full_path(char *Filename, char *Out_Path, int PathSize);
-static get_full_path *GetFullPath;
+//NOTE(chen): concat the given filename with the model's directory
+typedef void get_module_path(char *Filename, char *Out_Path, int PathSize);
+static get_module_path *GetModulePath;

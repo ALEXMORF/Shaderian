@@ -108,6 +108,38 @@ void Win32GetFullPath(char *Filename, char *Out_Path, int PathSize)
     }
 }
 
+void Win32GetModulePath(char *Filename, char *Out_Path, int PathSize)
+{
+    char ModuleDirectory[255] = {};
+    GetModuleFileName(0, ModuleDirectory, sizeof(ModuleDirectory));
+    int LastSlash = -1;
+    {
+        char *Walker = ModuleDirectory;
+        while (*Walker)
+        {
+            if (*Walker == '\\' || *Walker == '/')
+            {
+                LastSlash = (int)(Walker - ModuleDirectory);
+            }
+            Walker += 1;
+        }
+        
+        if (LastSlash != -1)
+        {
+            ModuleDirectory[LastSlash+1] = 0;
+        }
+    }
+    
+    if (StringStartsWith(Filename + 1, ":\\") || StringStartsWith(Filename, ":/"))
+    {
+        snprintf(Out_Path, PathSize, "%s", Filename);
+    }
+    else
+    {
+        snprintf(Out_Path, PathSize, "%s\\%s", ModuleDirectory, Filename);
+    }
+}
+
 int main(int ArgumentCount, char **ArgumentList) 
 {
     bool ShazanMode = false;
@@ -157,7 +189,7 @@ int main(int ArgumentCount, char **ArgumentList)
         return -1;
     }
     SetWindowLong(Window, GWL_EXSTYLE, WS_EX_LAYERED);
-    GetFullPath = Win32GetFullPath;
+    GetModulePath = Win32GetModulePath;
     
     HDC WindowDC = GetWindowDC(0); 
     i32 FrameRate = GetDeviceCaps(WindowDC, VREFRESH);

@@ -122,7 +122,8 @@ internal GLuint
 UploadHdrMap(char *Filename)
 {
     char FullPathFilename[255] = {};
-    GetFullPath(Filename, FullPathFilename, sizeof(FullPathFilename));
+    GetModulePath(Filename, FullPathFilename, sizeof(FullPathFilename));
+    printf("finding %s\n", FullPathFilename);
     
     GLuint HdrMap = 0;
     glGenTextures(1, &HdrMap);
@@ -131,6 +132,11 @@ UploadHdrMap(char *Filename)
         int Width, Height, ChannelCount;
         f32 *Data = stbi_loadf(FullPathFilename, &Width, 
                                &Height, &ChannelCount, 0);
+        if (!Data)
+        {
+            printf("Can't find %s\n", FullPathFilename);
+        }
+        
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, Width, Height, 
                      0, GL_RGB, GL_FLOAT, Data);
         stbi_image_free(Data);
