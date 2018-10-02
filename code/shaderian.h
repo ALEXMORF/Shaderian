@@ -42,3 +42,5 @@ struct app_state
     b32 IsInitialized;
 };
 
+typedef void get_full_path(char *Filename, char *Out_Path, int PathSize);
+static get_full_path *GetFullPath;

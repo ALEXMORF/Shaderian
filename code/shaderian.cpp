@@ -119,14 +119,18 @@ CompileShaderProgram(char *FragShaderSrc, string ErrorMessage = {},
 }
 
 internal GLuint
-UploadHdrMap(char *Path)
+UploadHdrMap(char *Filename)
 {
+    char FullPathFilename[255] = {};
+    GetFullPath(Filename, FullPathFilename, sizeof(FullPathFilename));
+    
     GLuint HdrMap = 0;
     glGenTextures(1, &HdrMap);
     glBindTexture(GL_TEXTURE_2D, HdrMap);
     {
         int Width, Height, ChannelCount;
-        f32 *Data = stbi_loadf(Path, &Width, &Height, &ChannelCount, 0);
+        f32 *Data = stbi_loadf(FullPathFilename, &Width, 
+                               &Height, &ChannelCount, 0);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, Width, Height, 
                      0, GL_RGB, GL_FLOAT, Data);
         stbi_image_free(Data);

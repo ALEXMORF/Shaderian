@@ -94,6 +94,20 @@ bool StringStartsWith(char *A, char *Header)
     return true;
 }
 
+void Win32GetFullPath(char *Filename, char *Out_Path, int PathSize)
+{
+    char CurrentDirectory[255] = {};
+    GetCurrentDirectory(sizeof(CurrentDirectory), CurrentDirectory);
+    if (StringStartsWith(Filename + 1, ":\\") || StringStartsWith(Filename, ":/"))
+    {
+        snprintf(Out_Path, PathSize, "%s", Filename);
+    }
+    else
+    {
+        snprintf(Out_Path, PathSize, "%s\\%s", CurrentDirectory, Filename);
+    }
+}
+
 int main(int ArgumentCount, char **ArgumentList) 
 {
     bool ShazanMode = false;
@@ -127,17 +141,8 @@ int main(int ArgumentCount, char **ArgumentList)
         }
     }
     
-    char CurrentDirectory[255] = {};
-    GetCurrentDirectory(sizeof(CurrentDirectory), CurrentDirectory);
     char FullShaderPath[255] = {};
-    if (StringStartsWith(ShaderFilename + 1, ":\\") || StringStartsWith(ShaderFilename, ":/"))
-    {
-        snprintf(FullShaderPath, sizeof(FullShaderPath), "%s", ShaderFilename);
-    }
-    else
-    {
-        snprintf(FullShaderPath, sizeof(FullShaderPath), "%s\\%s", CurrentDirectory, ShaderFilename);
-    }
+    Win32GetFullPath(ShaderFilename, FullShaderPath, sizeof(FullShaderPath));
     
     SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
     
@@ -151,9 +156,8 @@ int main(int ArgumentCount, char **ArgumentList)
         ErrorMessageBox("Couldn't create a window");
         return -1;
     }
-    //extra styling on our window to make it transparent 
-    
     SetWindowLong(Window, GWL_EXSTYLE, WS_EX_LAYERED);
+    GetFullPath = Win32GetFullPath;
     
     HDC WindowDC = GetWindowDC(0); 
     i32 FrameRate = GetDeviceCaps(WindowDC, VREFRESH);
