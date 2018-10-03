@@ -24,6 +24,14 @@ uniform vec2 uResolution; // window client rect resolution in pixels
 uniform int uFrameIndex;  // the count of frames that's been run before current frame
 uniform sampler2D uPrevFrame;  // access to previous frame as texture
 
+// HDR environment maps
+uniform sampler2D GraceCathedral;
+uniform sampler2D Glacier;
+uniform sampler2D UffiziGallery;
+uniform sampler2D EnnisDiningRoom;
+uniform sampler2D PisaCourtyard;
+uniform sampler2D DogeCourtyard;
+
 in vec2 FragCoord;        // normalized fragment coordinate, range: <[-1, 1], [-1, 1]>
 out vec3 FragColor;       // output color
 
